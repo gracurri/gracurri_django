@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<title>GRACURRI</title>
+
+<head>
+    <meta charset="UTF-8">
+    
+
+    <link rel="stylesheet" href="grade_sub.css">
+    <!-- css 파일 참조 -->
+    <link rel="stylesheet" href="topbar.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="icon" href="./images/GRACURRI_LOGO.png">
+</head>
+<title>GRACURRI</title>
+
+<body>
+    <div class="parent">        
+        <div class="topbar">
+            <div class="Gname">
+                <b>Gracurri</b>
+            </div>
+            <div class="btns">
+                <div id="loginDone"></div>
+                <a href="" id="btn1">About us </a>
+                <a href="http://localhost:3000/realmain" id="btn3">로그인</a>
+                <button type="button" onclick = "location.href='localhost:3000/signup'" class="signupbtn" id="btn4">회원가입</button>
+            </div>
+        <div class="inner-box">
+            <div class="backbtn">
+                <a href="http://localhost:3000/timetable" id="back">BACK</a>
+            </div>
+            <div class="bread">
+            </div>
+            <div class="text">
+                <!--왼쪽정렬이랑 줄바꿈 기능 있으려나-->
+                <p style="margin-left: 190px;"><strong id="semester"></strong></p>
+                <p><strong>상세과목 입니다.</strong></p>
+            </div>
+        </div>
+    </div>
+    </div> 
+    <script>  
+        const doc = document;
+        let userCookieId;
+        let requestSem;
+        
+        var getCookie = function(name) {
+            var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return value? value[2] : null;
+        };        
+
+        doc.getElementById('loginDone').innerText = getCookie('userid') + "님"
+        doc.getElementById('btn3').style.display = "none"
+        doc.getElementById('btn4').style.display = "none"
+
+        if(localStorage.getItem('semester')){ 
+            requestSem = localStorage.getItem('semester') 
+        }
+
+        userCookieId = getCookie('userid');
+    
+        console.log(doc.cookie)
+        console.log(userCookieId)
+        console.log(requestSem)
+
+        //함수들
+        subjectShowFunc = (subjectsfunc) => {
+            subjects = subjectsfunc()
+            countSubject = subjects.length;
+            
+            const bread = doc.querySelector('.bread');                
+            console.log('test')
+
+            for (const i = 0; i < countSubject; i++){
+                const subjectDiv = doc.createElement('div');
+                const subjectP = doc.createElement('p');
+                const subjectName = doc.createTextNode(subjects[i]) 
+                                        
+                subjectP.appendChild(subjectName)
+                subjectP.classList.add('subject')
+
+                subjectDiv.appendChild(subjectP)
+                subjectDiv.classList.add('list')
+
+                if (i == 0){ 
+                    subjectDiv.classList.add('list1')
+                }  
+                            
+                bread.appendChild(subjectDiv);
+            }    
+        }  
+
+        subjectInfoFunc=()=>{
+            let subjectNameArr = [];
+            let codeNumFull;
+            let codeNumFullLen;
+            const bread = doc.querySelector('.bread');  
+
+            fetch("http://localhost:3000/to_attend?email=" + userCookieId + "&semester=" + requestSem)
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res)
+                if(res.code === 200){
+                    let semester = doc.getElementById('semester');
+                    semester.innerText = res.semester + " 의"
+                    // // //res.result는 서버 응답 맞춰서 수정해야함
+                    codeNumFull = res.result;
+                    codeNumFullLen = codeNumFull.length;
+                    console.log(codeNumFullLen)
+                }
+            })
+            .then(()=>{
+                for(let i=0; i < codeNumFullLen; i+=10){
+                    let temp = codeNumFull.slice(i,i+10);
+                    console.log(temp)
+                    fetch("http://localhost:3000/name?code=" + temp)
+                    .then((res) => res.json())
+                    .then((res) => {
+                        console.log(res.result)
+                        subjectNameArr.push(res.result);
+
+                        const subjectDiv = doc.createElement('div');
+                        const subjectP = doc.createElement('p');
+                        const subjectName = doc.createTextNode(res.result) 
+                                                
+                        subjectP.appendChild(subjectName)
+                        subjectP.classList.add('subject')
+
+                        subjectDiv.appendChild(subjectP)
+                        subjectDiv.classList.add('list')
+
+                        if (subjectNameArr.length == 1){ 
+                            subjectDiv.classList.add('list1')
+                        }  
+                                    
+                        bread.appendChild(subjectDiv);
+                    })
+                }
+            })
+            .catch(err => {
+                // error 처리
+                console.log('Fetch Error', err);    
+            });    
+
+            return subjectNameArr
+        }
+
+        subjectShowFunc(subjectInfoFunc)
+    
+        
+    </script>
+</body>
+
+</html>
