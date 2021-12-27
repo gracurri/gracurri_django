@@ -63,3 +63,20 @@ class users(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+class classes(models.Model):
+    division=models.CharField(maxlength=10,help_text="이수구분")
+    multi_major=models.CharField(max_length=50,null=True)
+    engineering=models.CharField(max_length=50)
+    etc_div=models.CharField(max_length=80)
+    id=models.CharField(max_length=40,null=False,default="",primary_key=True)
+    name=models.CharField(max_length=70)
+    classdiv=models.CharField(max_length=10)
+    professor=models.CharField(max_length=10)
+    establishedby=models.CharField(max_length=20)
+    unit=models.IntegerField()
+    seats=models.IntegerField()
+    classtime=models.CharField(max_length=50)
+    location=models.CharField(max_length=30)
+    targetstudent_grade=models.IntegerField()
+    targetstudent_dep=models.CharField(max_length=20)
+    targetstudent_foreign=models.BooleanField(default=False)
